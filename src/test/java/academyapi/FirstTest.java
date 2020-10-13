@@ -1,9 +1,15 @@
 package academyapi;
 
+import academyapi.pojos.Issuetype;
+import academyapi.pojos.Project;
+import academyapi.pojos.Fields;
 import academyapi.pojos.PojoMockApi;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.hamcrest.Matchers;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.testng.Assert;
 
 import org.testng.annotations.Test;
@@ -15,7 +21,7 @@ import java.util.List;
 
 public class FirstTest {
     private Response _response;
-    private Integer _lastId;
+    private String _lastId;
 
     @Test
     public void testOne() {
@@ -44,10 +50,17 @@ public class FirstTest {
     }
 
     @Test
-    public void creatingAJiraBug() {
-        File jsonCreatAnIssue = new File("src/test/resources/creatingIssue.json");
+    public void creatingAJiraBug() throws ParseException {
+        //Project projectString = new Project("API")
+        Fields fields = new Fields(new Project("API"), "REST ye merry gentlemen",
+                "Creating of an issue using Project keys and issue type names using the REST API", new Issuetype("Bug"));
+        File jsonCreatAnIssue = new File("src/test/resources/creatingIssue.json"); //this json file is created to send a post if you want to use the json directly
+        System.out.println("{"+fields.toString()+"}");
+        String jsonIssue = "{"+fields.toString()+"}";
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(jsonIssue);
         _response = RestAssured.given().auth().preemptive().basic("elcorregidorc@correo.udistrital.edu.co", "odLsGl7LeBinegJe4dCu21AD")
-                .contentType("application/json").body(jsonCreatAnIssue).when().post("https://edwardcorregidor.atlassian.net/rest/api/2/issue/");
+                .contentType("application/json").body(json).when().post("https://edwardcorregidor.atlassian.net/rest/api/2/issue/");
         _lastId = _response.then().contentType("application/json").extract().path("id");
         System.out.println(_lastId);
         Assert.assertEquals(_response.getStatusCode(), 201);
