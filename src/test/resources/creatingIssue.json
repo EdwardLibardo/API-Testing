@@ -1,0 +1,13 @@
+{
+  "fields": {
+    "project":
+    {
+      "key": "API"
+    },
+    "summary": "1era prueba java",
+    "description": "creating an issue java first test",
+    "issuetype": {
+      "name": "Bug"
+    }
+  }
+}
