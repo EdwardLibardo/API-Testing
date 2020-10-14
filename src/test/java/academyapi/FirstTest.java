@@ -67,10 +67,9 @@ public class FirstTest {
             for (int i = 0; i <= length - 1; i++) {
                 try {
                     String emailToCompare = list.get(i);
-                    if (!emailReadyToBeSent.equals(emailToCompare)){
+                    if (!emailReadyToBeSent.equals(emailToCompare)) {
                         _response = RestAssured.given().contentType("application/json").body(user).when().post("https://5f8386306b97440016f4e745.mockapi.io/users/");
-                    }
-                    else {
+                    } else {
                         throw new Exception();
                     }
                 } catch (Exception e) {
@@ -109,5 +108,21 @@ public class FirstTest {
         }
         int lastValue = Integer.parseInt(String.valueOf(allIds.get(0)));
         Assert.assertTrue(lastValue > Integer.parseInt(String.valueOf(allIds.get(1))));
+    }
+
+    @Test
+    public void creatingAjiraTicketFromMockApi() throws ParseException {
+        String idOfUserYouWant = "1";
+        _response = (Response) RestAssured.get("https://5f8386306b97440016f4e745.mockapi.io/users/" + idOfUserYouWant);
+        String descriptionOfIssue = _response.then().extract().path("name", "lastName");
+        String idOfUser = _response.then().extract().path("id");
+        Fields fields = new Fields(new Project("API"), "Bug title - description",
+                "User " + descriptionOfIssue + " with Job Position and id " + idOfUser + " found a defect related to", new Issuetype("Bug"));
+        String jsonIssue = "{" + fields.toString() + "}";
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(jsonIssue);
+        _response = RestAssured.given().auth().preemptive().basic("elcorregidorc@correo.udistrital.edu.co", "odLsGl7LeBinegJe4dCu21AD")
+                .contentType("application/json").body(json).when().post("https://edwardcorregidor.atlassian.net/rest/api/2/issue/");
+        Assert.assertEquals(_response.getStatusCode(), 201);
     }
 }
