@@ -27,7 +27,7 @@ public class FirstTest {
     private static Logger logger = Logger.getLogger(String.valueOf(FirstTest.class));
 
     @Test
-    public void testOne() {
+    public void verifyTheMockApiEndpointIsEmpty() {
         _response = (Response) RestAssured.get("https://5f8386306b97440016f4e745.mockapi.io/users");
         Assert.assertEquals(_response.getStatusCode(), 200);
         //check if the body is empty
@@ -45,7 +45,7 @@ public class FirstTest {
     }
 
     @Test
-    public void testTwo() throws Exception {
+    public void createAUserWithThePojoMockApiEndpoint() throws Exception {
         PojoMockApi user = new PojoMockApi(2, "Cristiano1", "Ronaldo", 321312, 13123, "retiro",
                 "cristianito@gmail.com", true, "colombia", 31221);
         _response = RestAssured.given().contentType("application/json").body(user).when().post("https://5f8386306b97440016f4e745.mockapi.io/users/");
