@@ -17,18 +17,21 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class FirstTest {
     private Response _response;
     private String _lastId;
+    private static Logger logger = Logger.getLogger(String.valueOf(FirstTest.class));
 
     @Test
     public void testOne() {
         _response = (Response) RestAssured.get("https://5f8386306b97440016f4e745.mockapi.io/users");
         Assert.assertEquals(_response.getStatusCode(), 200);
         //check if the body is empty
-        if (!_response.body().toString().isBlank()) {
+        if (!_response.body().toString().isEmpty()) {
             ArrayList<String> list = RestAssured.get("https://5f8386306b97440016f4e745.mockapi.io/users").then().extract().path("id");
             int length = list.size();
             //if the body is not empty, all the user will be deleted
@@ -44,9 +47,37 @@ public class FirstTest {
     @Test
     public void testTwo() throws Exception {
         PojoMockApi user = new PojoMockApi(2, "Cristiano1", "Ronaldo", 321312, 13123, "retiro",
-                "hjkdsfhs@gmail.com", true, "colombia", 31221);
+                "cristianito@gmail.com", true, "colombia", 31221);
         _response = RestAssured.given().contentType("application/json").body(user).when().post("https://5f8386306b97440016f4e745.mockapi.io/users/");
         Assert.assertEquals(_response.getStatusCode(), 201);
+    }
+
+    @Test
+    public void negativeTest() {
+
+        _response = (Response) RestAssured.get("https://5f8386306b97440016f4e745.mockapi.io/users");
+        String emailReadyToBeSent = "cristianito@gmail.com";
+        Assert.assertEquals(_response.getStatusCode(), 200);
+        PojoMockApi user = new PojoMockApi(2, "Cristiano2", "Ronaldo2", 3213122, 131232, "retiro2",
+                emailReadyToBeSent, true, "colombia", 312212);
+        if (!_response.body().toString().isEmpty()) {
+            ArrayList<String> list = RestAssured.get("https://5f8386306b97440016f4e745.mockapi.io/users").then().extract().path("email");
+            int length = list.size();
+            //if the body is not empty, all the user will be deleted
+            for (int i = 0; i <= length - 1; i++) {
+                try {
+                    String emailToCompare = list.get(i);
+                    if (!emailReadyToBeSent.equals(emailToCompare)){
+                        _response = RestAssured.given().contentType("application/json").body(user).when().post("https://5f8386306b97440016f4e745.mockapi.io/users/");
+                    }
+                    else {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    logger.log(Level.INFO, "The email is the same, so the user can't be created");
+                }
+            }
+        }
     }
 
     @Test
@@ -54,9 +85,10 @@ public class FirstTest {
         //Project projectString = new Project("API")
         Fields fields = new Fields(new Project("API"), "REST ye merry gentlemen",
                 "Creating of an issue using Project keys and issue type names using the REST API", new Issuetype("Bug"));
-        File jsonCreatAnIssue = new File("src/test/resources/creatingIssue.json"); //this json file is created to send a post if you want to use the json directly
-        System.out.println("{"+fields.toString()+"}");
-        String jsonIssue = "{"+fields.toString()+"}";
+        //this json file is created to create the bug using a file if you want to use the json directly
+        File jsonCreatAnIssue = new File("src/test/resources/creatingIssue.json");
+        System.out.println("{" + fields.toString() + "}");
+        String jsonIssue = "{" + fields.toString() + "}";
         JSONParser parser = new JSONParser();
         JSONObject json = (JSONObject) parser.parse(jsonIssue);
         _response = RestAssured.given().auth().preemptive().basic("elcorregidorc@correo.udistrital.edu.co", "odLsGl7LeBinegJe4dCu21AD")
